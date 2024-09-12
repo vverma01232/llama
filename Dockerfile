@@ -8,6 +8,9 @@ RUN apt-get update && \
     apt-get install -y wget build-essential cmake ninja-build libopenblas-dev pkg-config python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
+ENV TZ=America/New_York
+RUN ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && \
+    dpkg-reconfigure -f noninteractive tzdata
 # Copy requirements file and install Python packages
 COPY requirements.txt ./
 RUN pip3 install --no-cache-dir -r requirements.txt
