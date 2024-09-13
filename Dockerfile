@@ -27,7 +27,7 @@ RUN huggingface-cli login --token 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
 RUN git-lfs install
 
 # Clone the repository after logging in
-RUN git clone https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct.git .
+RUN git clone https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct .
 
 # Set file permissions for the cloned files
 RUN chmod -R 775 /models
