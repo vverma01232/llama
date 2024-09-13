@@ -22,10 +22,10 @@ RUN mkdir /models && chmod 775 /models
 RUN huggingface-cli login --token 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 --add-to-git-credential
 
 # Optionally skip downloading large files by setting this env variable
-RUN git-lfs install
+RUN git lfs install
 
 # Clone the repository after logging in
-RUN git clone https://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@huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct 
+RUN git clone https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct 
 
 WORKDIR /Meta-Llama-3-8B-Instruct
 
