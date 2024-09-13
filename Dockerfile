@@ -1,35 +1,21 @@
-# Use a base image with CUDA support
-FROM nvidia/cuda:11.8.0-base-ubuntu20.04
+# Use a more complete base image like Alpine since BusyBox has limited package support
+FROM alpine:latest
 
-WORKDIR /app
+# Install required dependencies (git, git-lfs, and wget)
+RUN apk add --no-cache git git-lfs bash && \
+    git lfs install
 
-# Install necessary dependencies
-RUN apt-get update && \
-    apt-get install -y wget build-essential cmake ninja-build libopenblas-dev pkg-config python3-pip && \
-    rm -rf /var/lib/apt/lists/*
+# Create the /models directory and set appropriate permissions
+RUN mkdir /models && chmod 775 /models
 
-ENV TZ=America/New_York
-RUN ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && \
-    dpkg-reconfigure -f noninteractive tzdata
-# Copy requirements file and install Python packages
-COPY requirements.txt ./
-RUN pip3 install --no-cache-dir -r requirements.txt
+# Accept Hugging Face token as a build argument
+ARG HF_TOKEN
 
-# Set environment variables for CMake
-ENV CMAKE_ARGS="-DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS"
-ENV FORCE_CMAKE=1
+# Set the working directory to /models
+WORKDIR /models
 
-# Install llama-cpp-python package
-RUN pip3 install llama-cpp-python
+# Clone the Hugging Face repository using the token
+RUN git clone https://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:x-oauth-basic@huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct.git .
 
-# Copy the rest of the application code
-COPY . .
-
-# Download the model file
-RUN wget -q https://huggingface.co/bartowski/Meta-Llama-3-8B-Instruct-GGUF/resolve/main/Meta-Llama-3-8B-Instruct-IQ2_S.gguf -O llama
-
-# Expose port if needed (optional)
-# EXPOSE 8080
-
-# Command to run the application
-CMD ["python3", "./app.py"]
+# Set file permissions for the cloned files
+RUN chmod -R 775 /models
