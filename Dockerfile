@@ -5,8 +5,14 @@ FROM alpine:latest
 RUN apk add --no-cache git git-lfs bash python3 py3-pip && \
     git lfs install
 
-# Install Hugging Face CLI
-RUN  pip install -U "huggingface_hub[cli]"
+# Create a virtual environment for Python packages
+RUN python3 -m venv /opt/venv
+
+# Activate the virtual environment and install Hugging Face CLI
+RUN . /opt/venv/bin/activate && pip install -U "huggingface_hub[cli]"
+
+# Ensure all future commands use the virtual environment
+ENV PATH="/opt/venv/bin:$PATH"
 
 # Create the /models directory and set appropriate permissions
 RUN mkdir /models && chmod 775 /models
