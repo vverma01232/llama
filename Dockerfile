@@ -17,8 +17,6 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Create the /models directory and set appropriate permissions
 RUN mkdir /models && chmod 775 /models
 
-# Set the working directory to /models
-WORKDIR /models
 
 # Authenticate using the Hugging Face CLI
 RUN huggingface-cli login --token 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
@@ -28,6 +26,10 @@ RUN git-lfs install
 
 # Clone the repository after logging in
 RUN git clone https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct .
+
+WORKDIR /Meta-Llama-3-8B-Instruct
+
+COPY . /models/
 
 # Set file permissions for the cloned files
 RUN chmod -R 775 /models
