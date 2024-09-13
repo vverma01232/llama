@@ -6,7 +6,7 @@ RUN apk add --no-cache git git-lfs bash python3 py3-pip && \
     git lfs install
 
 # Install Hugging Face CLI
-RUN pip install huggingface_hub
+RUN  pip install -U "huggingface_hub[cli]"
 
 # Create the /models directory and set appropriate permissions
 RUN mkdir /models && chmod 775 /models
