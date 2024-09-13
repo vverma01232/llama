@@ -19,7 +19,7 @@ RUN mkdir /models && chmod 775 /models
 
 
 # Authenticate using the Hugging Face CLI
-RUN huggingface-cli login --token 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
+RUN huggingface-cli login --token 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 --add-to-git-credential
 
 # Optionally skip downloading large files by setting this env variable
 RUN git-lfs install
