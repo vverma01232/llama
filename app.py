@@ -1,7 +1,5 @@
 from flask import Flask, request, Response, jsonify
 from gevent.pywsgi import WSGIServer
-import json
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 import transformers
 import torch
 
@@ -83,18 +81,10 @@ def chat_completion():
 
 
 if __name__ == "__main__":
-    model_config = AutoModelForSeq2SeqLM.from_pretrained("config.json")
-    model_weights = torch.load("pytorch_model.bin", map_location=torch.device("cpu"))
-# Load the model configuration
-    
-# Load the tokenizer
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3.1-8B")
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_config, state_dict=model_weights)
-
-    # model_id = "meta-llama/Meta-Llama-3.1-8B"
+    model_id = "meta-llama/Meta-Llama-3.1-8B"
     pipeline = transformers.pipeline(
         "text-generation",
-        model=model,
+        model=model_id,
         token="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",
         model_kwargs={"torch_dtype": torch.bfloat16},
         device_map="auto"
