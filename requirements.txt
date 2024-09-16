@@ -2,6 +2,5 @@ Flask==2.3.2
 gevent==22.10.2
 transformers==4.44.2
 torch
-json
 gunicorn
 accelerate==0.34.2
