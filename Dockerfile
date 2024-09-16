@@ -1,35 +1,30 @@
-# Use a more complete base image like Alpine since BusyBox has limited package support
-FROM alpine:latest
+# Base image with Python 3.9 and CUDA for GPU support
+FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
 
-# Install required dependencies (git, git-lfs, wget, python3, pip, and bash)
-RUN apk add --no-cache git git-lfs bash python3 py3-pip && \
-    git lfs install
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Create a virtual environment for Python packages
-RUN python3 -m venv /opt/venv
+# Install required system packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3-pip python3-dev && \
+    rm -rf /var/lib/apt/lists/*
 
-# Activate the virtual environment and install Hugging Face CLI
-RUN . /opt/venv/bin/activate && pip install -U "huggingface_hub[cli]"
+# Install torch with CUDA support
+RUN pip install torch==2.0.1+cu118 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
-# Ensure all future commands use the virtual environment
-ENV PATH="/opt/venv/bin:$PATH"
+# Set the working directory in the container
+WORKDIR /app
 
-# Create the /models directory and set appropriate permissions
-RUN mkdir /models && chmod 775 /models
+# Copy the requirements file and install dependencies, including accelerate
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy the app code to the container
+COPY . /app
 
-# Authenticate using the Hugging Face CLI
-RUN huggingface-cli login --token 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 --add-to-git-credential
+# Expose the port the app runs on
+EXPOSE 8080
 
-# Optionally skip downloading large files by setting this env variable
-RUN git lfs install
-
-# Clone the repository after logging in
-RUN git clone https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct 
-
-WORKDIR /Meta-Llama-3-8B-Instruct
-
-COPY . /models/
-
-# Set file permissions for the cloned files
-RUN chmod -R 775 /models
+# Run the Flask app with Gunicorn
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8080", "app:app"]

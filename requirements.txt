@@ -1,3 +1,7 @@
-kfp
-flask
-gevent
+Flask==2.3.2
+gevent==22.10.2
+transformers==4.44.2
+torch==2.0.1
+json
+gunicorn==20.1.0
+accelerate==0.34.2
