@@ -25,7 +25,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go application
-RUN go build -o main .
+RUN go build -o aisvc .
 
 # Expose the port the app runs on
 EXPOSE 8080
