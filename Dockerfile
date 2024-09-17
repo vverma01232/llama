@@ -1,27 +1,34 @@
-# Use the official Python image
-FROM python:3.9-slim-bullseye
+# Use the Ollama base image
+FROM ollama/ollama:latest
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Set environment variables for Ollama
+ENV OLLAMA_ORIGINS=*
+ENV OLLAMA_LOAD_TIMEOUT=-1
+ENV OLLAMA_KEEP_ALIVE=-1
 
-# # Install required system packages
-# RUN apt-get update && apt-get install -y --no-install-recommends \
-#     build-essential python3-dev && \
-#     rm -rf /var/lib/apt/lists/*
+RUN ollama serve
+# Install Go
+RUN apt-get update && \
+    apt-get install -y golang && \
+    mkdir -p /app
 
-# Set the working directory in the container
+# Set the Current Working Directory inside the container
 WORKDIR /app
 
-# Copy the requirements file and install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy the Go Modules manifests
+COPY go.mod go.sum ./
 
-# Copy the app code to the container
-COPY . /app
+# Download Go Modules dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
+RUN go mod download
+
+# Copy the source code into the container
+COPY . .
+
+# Build the Go application
+RUN go build -o main .
 
 # Expose the port the app runs on
 EXPOSE 8080
 
-# Run the Flask app with Gunicorn
-CMD ["python3", "app.py"]
+# Run the Ollama command and the Go application
+CMD ["./aisvc"]

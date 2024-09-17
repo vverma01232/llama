@@ -1,0 +1,5 @@
+.env
+*.yaml
+*.py
+*.md
+*.txt
