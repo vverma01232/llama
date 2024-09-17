@@ -1,7 +1,8 @@
 # First stage: Build the Go application
 FROM registry.opensuse.org/opensuse/bci/golang:latest as builder
 
-RUN curl -fsSL https://ollama.com/install.sh | sh
+RUN mkdir -p /ollama-bin
+RUN curl -fsSL https://ollama.com/install.sh | sh -s -- -b /ollama-bin
 
 ENV OLLAMA_ORIGINS=*
 ENV OLLAMA_LOAD_TIMEOUT=-1
@@ -26,6 +27,8 @@ FROM cgr.dev/chainguard/glibc-dynamic:latest-dev
 
 # Copy the Go binary from the previous stage
 COPY --from=builder /app/aisvc .
+COPY --from=builder /ollama-bin/.ollama /root/.ollama
+COPY --from=builder /ollama-bin/ollama /bin/ollama
 
 # Expose the port the app runs on
 EXPOSE 8080
