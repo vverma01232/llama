@@ -21,8 +21,16 @@ func main() {
 	//initiate db connection
 	model := os.Getenv("Model")
 
-	cmd := exec.Command("ollama pull " + model)
+	cmd := exec.Command("ollama serve")
 	output, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Error("Error while downloading the model")
+		return
+	}
+	log.Infof("%s", output)
+
+	cmd = exec.Command("ollama pull " + model)
+	output, err = cmd.CombinedOutput()
 	if err != nil {
 		log.Error("Error while downloading the model")
 		return
