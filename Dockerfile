@@ -3,6 +3,10 @@ FROM registry.opensuse.org/opensuse/bci/golang:latest as builder
 
 RUN curl -fsSL https://ollama.com/install.sh | sh
 
+ENV OLLAMA_ORIGINS=*
+ENV OLLAMA_LOAD_TIMEOUT=-1
+ENV OLLAMA_KEEP_ALIVE=-1
+
 # Set the Current Working Directory inside the container
 WORKDIR /app
 
