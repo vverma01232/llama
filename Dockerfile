@@ -28,7 +28,7 @@ FROM cgr.dev/chainguard/glibc-dynamic:latest-dev
 # Copy the Go binary from the previous stage
 COPY --from=builder /app/aisvc .
 COPY --from=builder /ollama-bin/.ollama /root/.ollama
-COPY --from=builder /ollama-bin/ollama /bin/ollama
+COPY --from=builder /ollama-bin/ollama /usr/local/bin/ollama
 
 # Expose the port the app runs on
 EXPOSE 8080
