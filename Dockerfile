@@ -6,7 +6,6 @@ ENV OLLAMA_ORIGINS=*
 ENV OLLAMA_LOAD_TIMEOUT=-1
 ENV OLLAMA_KEEP_ALIVE=-1
 
-RUN ollama serve
 # Install Go
 RUN apt-get update && \
     apt-get install -y golang && \
