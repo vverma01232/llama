@@ -18,41 +18,33 @@ func main() {
 		FullTimestamp: true,
 	})
 	config.LoadEnv()
+	//initiate db connection
+	model := os.Getenv("Model")
 
-	log.Info("Starting the server up ..........")
-	// Install Ollama
-	installOllama()
-
-	// Start Ollama service
 	cmd := exec.Command("ollama", "serve")
 	err := cmd.Start()
 	if err != nil {
-		log.Error("Error while starting server .......... ")
+		log.Error("Error while downloading the model..........")
 		return
 	}
-	log.Info("Starting up the Ollama service...")
+	log.Info("Starting up the server ..............")
 
-	// Wait for Ollama to be ready
-	if !waitForOllamaToBeReady(15 * time.Minute) {
-		log.Error("Error while starting server .......... ")
+	ollamaUp := waitForOllamaToBeReady(15 * time.Minute) // Wait for up to 60 seconds
+	if !ollamaUp {
+		log.Error("Error occured while running the model......")
 		return
 	}
-
-	// Pull the model
-	model := os.Getenv("Model")
-	log.Info("Downloading the model: ", model)
+	log.Info("Downloading the model : ", model)
 	cmd = exec.Command("ollama", "pull", model)
-	_, err = cmd.CombinedOutput()
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Error("Error while downloading the model: ", err)
+		log.Error("Error while downloading the model")
 		return
 	}
-	log.Infof("Model downloaded successfully.")
-
-	// Setup the CORS configuration and start the server
+	log.Infof("Model downloaded successfully. Output: %s", output)
 	corsConfig := cors.Config{
 		Origins:         "*",
-		RequestHeaders:  "Origin, Authorization, Content-Type, App-User, Org_id, User-Agent",
+		RequestHeaders:  "Origin, Authorization, Content-Type,App-User, Org_id, User-Agent",
 		Methods:         "GET, POST, PUT, DELETE",
 		Credentials:     false,
 		ValidateHeaders: false,
@@ -65,21 +57,10 @@ func main() {
 
 	log.Infof("Server listening on http://localhost:8080/")
 	if err := http.ListenAndServe("0.0.0.0:8080", router); err != nil {
-		log.Fatalf("There was an error with the HTTP server: %v", err)
+		log.Fatalf("There was an error with the http server: %v", err)
 	}
 }
 
-// Function to install Ollama
-func installOllama() {
-	cmd := exec.Command("sh", "-c", "curl -sSfL https://ollama.com/install.sh | sh")
-	_, err := cmd.CombinedOutput()
-	if err != nil {
-		log.Fatalf("Error running server.......")
-		return
-	}
-}
-
-// Function to wait for Ollama to be ready
 func waitForOllamaToBeReady(timeout time.Duration) bool {
 	client := http.Client{
 		Timeout: 5 * time.Second, // Set a small timeout for the health check request
@@ -87,9 +68,9 @@ func waitForOllamaToBeReady(timeout time.Duration) bool {
 	start := time.Now()
 
 	for time.Since(start) < timeout {
-		resp, err := client.Get("http://localhost:11434") // Adjust this URL if Ollama runs on a different port
+		resp, err := client.Get("http://localhost:11434") // Adjust this URL if ollama runs on a different port
 		if err == nil && resp.StatusCode == http.StatusOK {
-			log.Info("Server is up and running .......... ")
+			log.Info("Server is up and running.....")
 			return true
 		}
 		time.Sleep(2 * time.Second) // Wait for 2 seconds before retrying

@@ -1,12 +1,6 @@
 # First stage: Build the Go application
 FROM registry.opensuse.org/opensuse/bci/golang:latest as builder
 
-# RUN curl -sSfL https://ollama.com/install.sh | sh 
-
-# ENV OLLAMA_ORIGINS=*
-# ENV OLLAMA_LOAD_TIMEOUT=-1
-# ENV OLLAMA_KEEP_ALIVE=-1
-
 # Set the Current Working Directory inside the container
 WORKDIR /app
 
@@ -22,14 +16,26 @@ COPY . .
 # Build the Go application
 RUN CGO_ENABLED=0 GOOS=linux go build -o aisvc .
 
-FROM cgr.dev/chainguard/glibc-dynamic:latest-dev
+# Final stage: Prepare the runtime environment
+# FROM cgr.dev/chainguard/glibc-dynamic:latest-dev
 
-# Copy the Go binary from the previous stage
-COPY --from=builder /app/aisvc .
+# Set environment variables for Ollama
+ENV OLLAMA_ORIGINS=*
+ENV OLLAMA_LOAD_TIMEOUT=-1
+ENV OLLAMA_KEEP_ALIVE=-1
+
+# Install Ollama
+RUN curl -sSfL https://ollama.com/install.sh | sh
+
+# Copy the Go binary from the builder stage
+COPY --from=builder /app/aisvc /usr/local/bin/aisvc
+
+# Copy Ollama configuration and binaries if needed (uncomment if used)
 # COPY --from=builder /root/.ollama /root/.ollama
-# COPY --from=builder /usr/local/bin/ollama /usr/local/bin/ollama
+COPY --from=builder /usr/local/bin/ollama /usr/local/bin/ollama
 
 # Expose the port the app runs on
 EXPOSE 8080
 
-CMD ["./aisvc"]
+# Set the command to run the Go application and Ollama server
+CMD ["aisvc"]
