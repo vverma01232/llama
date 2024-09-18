@@ -1,5 +1,5 @@
 # First stage: Build the Go application
-FROM registry.opensuse.org/opensuse/bci/golang:latest as builder
+FROM registry.opensuse.org/opensuse/bci/golang:latest
 
 # Set the Current Working Directory inside the container
 WORKDIR /app
@@ -28,11 +28,11 @@ ENV OLLAMA_KEEP_ALIVE=-1
 RUN curl -sSfL https://ollama.com/install.sh | sh
 
 # Copy the Go binary from the builder stage
-COPY --from=builder /app/aisvc /usr/local/bin/aisvc
+COPY /app/aisvc /usr/local/bin/aisvc
 
 # Copy Ollama configuration and binaries if needed (uncomment if used)
 # COPY --from=builder /root/.ollama /root/.ollama
-COPY --from=builder /usr/local/bin/ollama /usr/local/bin/ollama
+COPY /usr/local/bin/ollama /usr/local/bin/ollama
 
 # Expose the port the app runs on
 EXPOSE 8080
