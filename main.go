@@ -27,14 +27,15 @@ func main() {
 		log.Error("Error while downloading the model..........")
 		return
 	}
+	log.Info("Starting up the server ..............")
 
 	ollamaUp := waitForOllamaToBeReady(15 * time.Minute) // Wait for up to 60 seconds
 	if !ollamaUp {
 		log.Error("Error occured while running the model......")
 		return
 	}
-
-	cmd = exec.Command("ollama", "pull "+model)
+	log.Info("Downloading the model : ", model)
+	cmd = exec.Command("ollama", "pull", model)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Error("Error while downloading the model")
@@ -69,7 +70,7 @@ func waitForOllamaToBeReady(timeout time.Duration) bool {
 	for time.Since(start) < timeout {
 		resp, err := client.Get("http://localhost:11434") // Adjust this URL if ollama runs on a different port
 		if err == nil && resp.StatusCode == http.StatusOK {
-			log.Info("Model is up and running.....")
+			log.Info("Server is up and running.....")
 			return true
 		}
 		time.Sleep(2 * time.Second) // Wait for 2 seconds before retrying
